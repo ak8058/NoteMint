@@ -15,6 +15,7 @@ import partyQuizRouter from "./routes/partyQuiz.route.js";
 import { clientUrl } from "./config/clientUrl.js";
 
 const app = express();
+app.set("trust proxy", 1);
 
 app.post(
   "/api/credits/webhook",
@@ -24,7 +25,11 @@ app.post(
 
 app.use(
   cors({
-    origin: [...new Set(["http://localhost:5173", clientUrl])],
+    origin: (origin, callback) => {
+      const isRenderFrontend = /^https:\/\/[a-z0-9-]+\.onrender\.com$/i.test(origin || "");
+      const allowed = !origin || origin === clientUrl || origin === "http://localhost:5173" || isRenderFrontend;
+      callback(allowed ? null : new Error("Origin is not allowed"), allowed);
+    },
     credentials: true,
   }),
 );

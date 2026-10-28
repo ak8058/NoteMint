@@ -4,7 +4,7 @@ const isAuth= async(req,res,next)=>{
     try {
         let {token}=req.cookies
         if(!token){
-            return res.status(400).json({message:"Token is not found"})
+            return res.status(401).json({message:"Token is not found"})
         }
         let verifyToken=jwt.verify(token,process.env.JWT_SECRET)
         if(!verifyToken){
@@ -13,7 +13,7 @@ const isAuth= async(req,res,next)=>{
         req.userId=verifyToken.userId
         next()
     } catch (error) {
-        return res.status(500).json({message:`is auth error ${error}`})
+        return res.status(401).json({message:"Invalid or expired session"})
     }
 }
 

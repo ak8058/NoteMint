@@ -69,7 +69,7 @@ export const generateNotes = async (req, res) => {
 
     } catch (error) {
         console.error(`Notes generation failed during ${failureStage}:`, error?.name || "UnknownError")
-        res.status(500).json({
+        res.status(failureStage === "AI provider" ? 502 : 500).json({
             error: "AI generation failed",
             message: `Notes generation failed during ${failureStage}. Please try again.`
         })

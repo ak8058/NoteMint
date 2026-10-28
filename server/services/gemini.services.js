@@ -3,6 +3,7 @@ const Gemini_URL =
 
 export const generateGeminiResponse = async (prompt) => {
   try {
+    if (!process.env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
     const response = await fetch(
       `${Gemini_URL}?key=${process.env.GEMINI_API_KEY}`,
       {
@@ -28,6 +29,7 @@ export const generateGeminiResponse = async (prompt) => {
     if (!response.ok) {
       const providerError = new Error("Gemini request failed");
       providerError.status = response.status;
+      providerError.providerMessage = (await response.json().catch(() => ({}))).error?.message;
       throw providerError;
     }
 
@@ -46,7 +48,7 @@ export const generateGeminiResponse = async (prompt) => {
 
     return JSON.parse(cleanText);
   } catch (error) {
-    console.error("Gemini request failed:", error?.status || error?.name || "UnknownError");
+    console.error("Gemini request failed:", error?.status || error?.name || "UnknownError", error?.providerMessage || "");
     const safeError = new Error("Gemini API request failed");
     safeError.status = error?.status;
     safeError.name = error?.name || "GeminiRequestError";
@@ -56,6 +58,7 @@ export const generateGeminiResponse = async (prompt) => {
 
 export const generateGeminiResponseFromImages = async (prompt, images) => {
   try {
+    if (!process.env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
     const parts = [{ text: prompt }];
     images.forEach((image, index) => {
       // Keep scan order explicit for multi-page notes.

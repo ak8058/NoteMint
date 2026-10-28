@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "motion/react";
 import { FcGoogle } from "react-icons/fc";
 import { signInWithPopup } from "firebase/auth";
@@ -10,7 +10,12 @@ import { setUserData } from "../redux/userSlice";
 
 function Auth() {
   const dispatch = useDispatch();
+  const [signingIn, setSigningIn] = useState(false);
+  const [authError, setAuthError] = useState("");
   const handleGoogleAuth = async () => {
+    if (signingIn) return;
+    setSigningIn(true);
+    setAuthError("");
     try {
       const response = await signInWithPopup(auth, provider);
       const User = response.user;
@@ -25,7 +30,21 @@ function Auth() {
       );
       dispatch(setUserData(result.data));
     } catch (error) {
-      console.log(error);
+      console.error("Google sign-in failed:", error);
+      const code = error?.code;
+      if (code === "auth/unauthorized-domain") {
+        setAuthError("This website domain is not authorized in Firebase. Add notemintai.vercel.app under Authentication → Settings → Authorized domains.");
+      } else if (code === "auth/popup-blocked") {
+        setAuthError("Your browser blocked the Google sign-in popup. Allow popups for this site and try again.");
+      } else if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
+        setAuthError("Google sign-in was cancelled. Try again when ready.");
+      } else if (error?.response) {
+        setAuthError("Google sign-in completed, but NoteMint could not create your session. Check the backend URL and deployment logs.");
+      } else {
+        setAuthError(`Google sign-in failed${code ? ` (${code})` : ". Check your connection and Firebase settings."}`);
+      }
+    } finally {
+      setSigningIn(false);
     }
   };
   return (
@@ -57,6 +76,7 @@ function Auth() {
 
           <motion.button
             onClick={handleGoogleAuth}
+            disabled={signingIn}
             whileHover={{
               y: -10,
               rotateX: 8,
@@ -65,15 +85,17 @@ function Auth() {
             }}
             whileTap={{ scale: 0.97 }}
             transition={{ type: "spring", stiffness: 200, damping: 18 }}
-            className="mt-10 px-10 py-3 rounded-xl
+            className="mt-10 px-10 py-3 rounded-xl disabled:opacity-60 disabled:cursor-wait
                 flex items-center gap-3
                 bg-gradient-to-br from-black/90 via-black/80 to-black/90 border border-white/10
                 text-white font-semibold text-lg
                 shadow-[0_25px_60px_rgba(0,0,0,0.7)]"
           >
             <FcGoogle size={22} />
-            Continue with Google
+            {signingIn ? "Connecting to Google…" : "Continue with Google"}
           </motion.button>
+
+          {authError && <p role="alert" className="mt-4 max-w-xl rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{authError}</p>}
 
           <p
             className=" mt-6 max-w-xl text-lg

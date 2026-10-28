@@ -115,3 +115,16 @@ server/
 ## ⭐ Support  
 
 If you found this project useful, consider giving it a ⭐ on GitHub.
+
+## Render deployment configuration
+
+Set these variables on the **backend** service (never commit `.env` files):
+
+- `MONGODB_URL` — MongoDB connection string; allow the Render service to reach the Atlas cluster.
+- `JWT_SECRET` — long random signing secret.
+- `GEMINI_API_KEY` — key with Gemini API access enabled.
+- `STRIPE_SECRET_KEY` — Stripe secret key for the same mode (test or live) as Checkout.
+- `STRIPE_WEBHOOK_SECRET` — signing secret for `/api/credits/webhook`.
+- `CLIENT_URL` — exact deployed frontend origin, such as `https://your-client.onrender.com` (no path or trailing slash).
+
+Set `VITE_SERVER_URL` on the **frontend** service to the backend origin, such as `https://notemint-yg7h.onrender.com`, then redeploy the frontend. Vite embeds this value at build time. Add `notemintai.vercel.app` to Firebase Authentication → Settings → Authorized domains, and make sure Google is enabled under Authentication → Sign-in method. In Stripe, register `https://your-server.onrender.com/api/credits/webhook` for the `checkout.session.completed` event.

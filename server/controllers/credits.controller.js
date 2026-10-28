@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import UserModel from "../models/user.model.js";
-import { clientUrl } from "../config/clientUrl.js";
+import { getClientUrl } from "../config/clientUrl.js";
 
 const getStripe = () => new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -43,8 +43,8 @@ const applyPaidSession = async (session, expectedUserId) => {
 };
 
 export const createCreditsOrder = async (req, res) => {
-  const stripe = getStripe();
   try {
+    const stripe = getStripe();
     const userId = req.userId;
     const { amount } = req.body;
 
@@ -57,8 +57,8 @@ export const createCreditsOrder = async (req, res) => {
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
-      success_url: `${clientUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${clientUrl}/payment-failed`,
+      success_url: `${getClientUrl(req)}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${getClientUrl(req)}/payment-failed`,
       line_items: [
         {
           price_data: {
@@ -79,6 +79,7 @@ export const createCreditsOrder = async (req, res) => {
 
     res.status(200).json({ url: session.url });
   } catch (error) {
+    console.error("Stripe checkout creation failed:", error?.type || error?.name || "UnknownError");
     res.status(500).json({ message: "Stripe error" });
   }
 };
