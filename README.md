@@ -2,7 +2,7 @@
 ### 📚 Smart Notes | ⚡ Revision Mode | 📊 Diagrams & Charts | 💳 Stripe Integration  
 
 🔗 **Live Demo:**  
-👉 https://exam-notes-generator-client.onrender.com
+👉 
 ---
 
 ## 🧠 Overview  
@@ -111,14 +111,6 @@ server/
 
 ---
 
-## 🧑‍💻 Author  
-
-**Abhishek Kumar**  
-
-- 🔗 GitHub: https://github.com/abhishek-kr09  
-- 💼 LinkedIn: https://www.linkedin.com/in/abhishek-kr18  
-
----
 
 ## ⭐ Support  
 
